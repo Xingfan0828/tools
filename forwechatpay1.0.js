@@ -9,16 +9,14 @@ console.setPosition(-100, 800);
 sleep(1000);
 
 // 获取用户输入的参数
-const nums=119; // 操作图片数量
+const nums=100; // 操作图片数量
 // const huashu='银河国际\n棋牌电子特邀注册就送\n\n首充即送8888元\n官方直营:78game.cc\n凭到账凭证客服申请'
 const huashu='银河国际送专属礼\n棋牌电子大奖等你抢\n特邀专属注册就送\n首充再送888元\n官方直营下载领取:78game.cc'
-const payPassword="920828"; // 微信支付密码
-
-
+const payPassword="123456"; // 微信支付密码
 
 
 // 日志时间
-let nowdateStr = getNowDateStr();
+let nowdateStr = getNowTimeStr().slice(0,10);
 // 设置全局超时和重试逻辑
 const maxwait_time = 5000; // 最大等待时间（毫秒）
 const RETRY_TIMES = 3; // 最大重试次数
@@ -67,17 +65,7 @@ function getNowTimeStr() {
     let ss = ("0" + now.getSeconds()).slice(-2);
     return `${yyyy}-${MM}-${dd} ${hh}:${mm}:${ss}`;
 }
-// 获取当前时间字符串
-function getNowDateStr() {
-    let now = new Date();
-    let yyyy = now.getFullYear();
-    let MM = ("0" + (now.getMonth() + 1)).slice(-2);
-    let dd = ("0" + now.getDate()).slice(-2);
-    let hh = ("0" + now.getHours()).slice(-2);
-    let mm = ("0" + now.getMinutes()).slice(-2);
-    let ss = ("0" + now.getSeconds()).slice(-2);
-    return `${yyyy}-${MM}-${dd}`;
-}
+
 
 // 判断微信是否在前台
 function isWeChatInForeground() {
