@@ -1,24 +1,24 @@
-"auto";
-console.show(true);
-console.log("调整大小...");
-sleep(1000);
-console.setSize(300, 300);
-sleep(1000);
-console.log("调整位置...");
-console.setPosition(-100, 800);
-sleep(1000);
+// "auto";
+// console.show(true);
+// console.log("调整大小...");
+// sleep(1000);
+// console.setSize(300, 300);
+// sleep(1000);
+// console.log("调整位置...");
+// console.setPosition(-100, 800);
+// sleep(1000);
 
 // 获取用户输入的参数
-const nums=100; // 操作图片数量
-// const huashu='银河国际\n棋牌电子特邀注册就送\n\n首充即送8888元\n官方直营:78game.cc\n凭到账凭证客服申请'
-const huashu='银河国际送专属礼\n棋牌电子大奖等你抢\n特邀专属注册就送\n首充再送888元\n官方直营下载领取:78game.cc'
-const payPassword="123456"; // 微信支付密码
+const nums=80; // 操作图片数量
+const huashu='银河国际\n棋牌电子特邀注册就送\n\n首充即送8888元\n官方直营:78game.cc\n凭到账凭证客服申请'
+const payPassword="000000"; // 微信支付密码
+
 
 
 // 日志时间
 let nowdateStr = getNowTimeStr().slice(0,10);
 // 设置全局超时和重试逻辑
-const maxwait_time = 5000; // 最大等待时间（毫秒）
+const maxwait_time = 3000; // 最大等待时间（毫秒）
 const RETRY_TIMES = 3; // 最大重试次数
 const SLEEP_DURATION = 1000; // 基础等待时间（毫秒）
 const paylogpath = "/sdcard/logs/"+nowdateStr+"paylog.txt"; // 日志文件路径
@@ -26,6 +26,7 @@ let maxScrollTimes = nums/4+1; // 最多滑动次数，防止死循环
 let conts=1; // 滑动次数
 let cont=1; // 已操作图片数量
 let jine=0.01; // 操作金额
+const maxjine=0.05; // 最大操作金额
 log("最多滑动次数 maxScrollTimes=" + maxScrollTimes);
 /**
  * 重试查找控件
@@ -66,7 +67,6 @@ function getNowTimeStr() {
     return `${yyyy}-${MM}-${dd} ${hh}:${mm}:${ss}`;
 }
 
-
 // 判断微信是否在前台
 function isWeChatInForeground() {
     return currentPackage() === "com.tencent.mm";
@@ -81,7 +81,9 @@ function inputPayPassword(password) {
             sleep(300); // 每次点击间隔
         } else {
             toastLog("未找到数字键：" + password[i]);
-            exit();
+            // exit();
+            back(); back(); back();
+            continue;
         }
     }
     toastLog("输入支付密码成功");
@@ -90,75 +92,77 @@ function inputPayPassword(password) {
 function mainFlow() {
     // let x=0;
     for (let scrollCount = 1; scrollCount < maxScrollTimes; scrollCount++) {
-        if(cont==nums){
+        for (let i = 0; i < 4; i++) {
+            if(cont>nums){
             toastLog("完成所有操作，退出脚本");
             exit();
-        }  
-        for (let i = 0; i < 4; i++) {
+            }  
+            xunhuan=true;
+            while (xunhuan) {
+                // 如果操作金额>最大金额，重置为0.01
+                if(jine > maxjine) jine = 0.01;
+                // 启动微信
+                $app.launchApp("微信");
+                sleep(SLEEP_DURATION);
 
-            // 如果操作金额>0.05，重置为0.01
-            if(jine > 0.01) jine = 0.01;
-            // 启动微信
-            $app.launchApp("微信");
-            sleep(SLEEP_DURATION);
-
-            // 判断微信是否在前台
-            if (!isWeChatInForeground()) {
-                toast("微信未在前台,返回重试");
-                back(); back(); back(); 
-                continue;
-            }
-
-            // 1. 打开发现页
-            let looks = retryFind(text("发现")); // 等待微信加载完成
-            if (!looks) { toastLog("未找到发现按钮，返回重试"); back(); back(); back(); continue; }
-            clickCenter(looks);
-            sleep(SLEEP_DURATION);
-
-            // 2. 打开 "扫一扫"
-            let saoyisao = retryFind(text("扫一扫"));
-            if (!saoyisao) { toastLog("未找到扫一扫按钮，返回重试"); back(); back(); back(); continue; }
-            clickCenter(saoyisao);
-            sleep(SLEEP_DURATION);
-
-            // 3. 点击 "相册"
-            let album = retryFind(text("相册"));
-            if (!album) { toastLog("未找到相册按钮，返回重试"); back(); back(); back(); continue; }
-            clickCenter(album); log("点击相册成功");
-            sleep(SLEEP_DURATION);
-            // 3.1 点击相机
-            let qiehuan = retryFind(id("gg"));
-            if (!qiehuan) { toastLog("未找到切换相机按钮，返回重试"); back(); back(); back(); continue;  }
-            clickCenter(qiehuan); log("点击切换相机成功");
-            sleep(700);
-
-            // let cameraimages=id("ga2").className("android.widget.TextView").text("相机").findOne();
-            let cameraimages=retryFind(id("ga2").className("android.widget.TextView").text("相机"));
-            if (!cameraimages) { toastLog("未找到相机图片列表，返回重试"); back(); back(); back(); continue;  }
-            clickCenter(cameraimages.parent()); log("点击相机图片列表成功");
-            sleep(700);
-
-            // 4. 获取图片列表
-            if(conts>0){
-                for (let s = 0; s < conts; s++) {
-                    swipe(300, 381, 300, 200, 600);
+                // 判断微信是否在前台
+                if (!isWeChatInForeground()) {
+                    toast("微信未在前台,返回重试");
+                    back(); back(); back(); 
+                    continue;
                 }
-                log("第"+scrollCount+"行");
-            }
-            sleep(SLEEP_DURATION);
 
-            // 4.1 选择图片
-            let images = className("ImageView").find();
-            if (!images || images.empty()) {
-                toastLog("未找到图片列表，返回重试");
-                back(); back(); back(); 
-                continue;
+                // 1. 打开发现页
+                let looks = retryFind(text("发现")); // 等待微信加载完成
+                if (!looks) { toastLog("未找到发现按钮，返回重试"); back(); back(); back(); continue; }
+                clickCenter(looks);
+                sleep(SLEEP_DURATION);
 
+                // 2. 打开 "扫一扫"
+                let saoyisao = retryFind(text("扫一扫"));
+                if (!saoyisao) { toastLog("未找到扫一扫按钮，返回重试"); back(); back(); back(); continue; }
+                clickCenter(saoyisao);
+                sleep(2000);
+
+                // 3. 点击 "相册"
+                let album = retryFind(text("相册"));
+                if (!album) { toastLog("未找到相册按钮，返回重试"); back(); back(); back(); continue; }
+                clickCenter(album); log("点击相册成功");
+                sleep(SLEEP_DURATION);
+                // 3.1 点击相机
+                let qiehuan = retryFind(id("gg"));
+                if (!qiehuan) { toastLog("未找到切换相机按钮，返回重试"); back(); back(); back(); continue;  }
+                clickCenter(qiehuan); log("点击切换相机成功");
+                sleep(700);
+
+                // let cameraimages=id("ga2").className("android.widget.TextView").text("相机").findOne();
+                let cameraimages=retryFind(id("ga2").className("android.widget.TextView").text("相机"));
+                if (!cameraimages) { toastLog("未找到相机图片列表，返回重试"); back(); back(); back(); continue;  }
+                clickCenter(cameraimages.parent()); log("点击相机图片列表成功");
+                sleep(700);
+
+                // 4. 获取图片列表
+                if(conts>0){
+                    for (let s = 0; s < conts; s++) {
+                        swipe(300, 381, 300, 200, 600);
+                    }
+                    log("第"+scrollCount+"行,第"+(i+1)+"个");
+                }
+                sleep(SLEEP_DURATION);
+
+                // 4.1 选择图片
+                let images = className("ImageView").find();
+                if (!images || images.empty()) {
+                    toastLog("未找到图片列表，返回重试");
+                    back(); back(); back(); 
+                    continue;
+                }
+                let img = images.get(i);
+                let key = img.bounds().toString();
+                log(cont+"选择图片：" + key);
+                img.parent().click();// 点击父层级
+                xunhuan=false;
             }
-            let img = images.get(i);
-            let key = img.bounds().toString();
-            log(cont+"选择图片：" + key);
-            img.parent().click();// 点击父层级
             cont++;
             sleep(50);
 
@@ -172,11 +176,11 @@ function mainFlow() {
                     log(getNowTimeStr() + ": 失败 " +(cont-1)+ "\n")
                     continue;
                 }else{
+                    log(getNowTimeStr() + ": 失败了 " +(cont-1)+ "\n")
                     back(); back(); back();
                     sleep(SLEEP_DURATION);
-                    back();
-                // return;
-                continue;
+                    back(); 
+                    continue;
                 }
             }
             //填入金额
@@ -213,6 +217,13 @@ function mainFlow() {
             let wzdl=text('我知道了').findOne(500);
             let jyxz=text('取消').findOne(500);
             switch(true){
+                case dongtai !==null:
+                    dongtai.click();
+                    sleep(500);
+                    toastLog("检测到支付密码界面，开始输入密码");
+                    inputPayPassword(payPassword);
+                    sleep(2000);
+                    break;
                 // 无异常输入密码
                 case mimakuang !==null:
                     toastLog("检测到支付密码界面，开始输入密码");
@@ -223,13 +234,6 @@ function mainFlow() {
                     continuePay.click();
                     sleep(500);      
                     // 点击后立即检查密码框
-                    toastLog("检测到支付密码界面，开始输入密码");
-                    inputPayPassword(payPassword);
-                    sleep(2000);
-                    break;
-                case dongtai !==null:
-                    dongtai.click();
-                    sleep(500);
                     toastLog("检测到支付密码界面，开始输入密码");
                     inputPayPassword(payPassword);
                     sleep(2000);
@@ -249,6 +253,7 @@ function mainFlow() {
             }
 
             // 输入密码后异常情况
+
             let confirmBtn = desc("完成").findOne(1500);
             let jiaoyi=text("关闭").findOne(500);
             let yczdl=text("我知道了").findOne(500);
@@ -266,8 +271,8 @@ function mainFlow() {
                 // 限制交易100笔
                 case jiaoyi !=null:
                     jiaoyi.click(); // 关闭选择界面
-                    toastLog("交易限制100笔,此账号已经全部完成"); 
-                    toastLog("完成所有操作，退出脚本");
+                    // toastLog("交易限制100笔,此账号已经全部完成"); 
+                    toastLog("对方账户违规，返回重试");
                     back(); back(); back();
                     // exit();
                     continue;
